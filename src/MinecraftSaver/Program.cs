@@ -8,10 +8,17 @@ namespace MinecraftSaver
 {
     internal class Program
     {
-        private static void Main( string[] args )
+        private static void Main( )
         {
-            Console.WriteLine( "Hello World" );
-            Console.ReadKey( );
+            Saver saver = new Saver( );
+            try
+            {
+                saver.CreateBackup( );
+            }
+            catch ( Exception ex )
+            {
+                Console.WriteLine( $"Error during backup creation: {ex.Message}" );
+            }
         }
     }
 }
