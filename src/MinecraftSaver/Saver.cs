@@ -16,13 +16,11 @@ namespace MinecraftSaver
         private const string AppDataEnvironmentVariable = "AppData";
         private const int SelectMostRecentCount = 5;
 
-        private readonly bool _backupMostRecentSave;
-        private readonly bool _allowOverwrite;
+        private readonly Config _config;
 
-        internal Saver( bool backupMostRecentSave, bool allowOverwrite )
+        internal Saver( Config config )
         {
-            _backupMostRecentSave = backupMostRecentSave;
-            _allowOverwrite = allowOverwrite;
+            _config = config;
         }
 
         internal void CreateBackup( )
@@ -36,7 +34,7 @@ namespace MinecraftSaver
 
             if ( File.Exists( backupFullFileName ) )
             {
-                if ( _allowOverwrite )
+                if ( _config.AllowOverwrite )
                 {
                     OverwriteSave( saveToBackup, backupFullFileName );
                     return;
@@ -95,7 +93,7 @@ namespace MinecraftSaver
         {
             IDictionary<int, DirectoryInfo> indexedSaves = new Dictionary<int, DirectoryInfo>( );
             IEnumerable<DirectoryInfo> mostRecentSaves = GetMostRecentSaves( );
-            if ( _backupMostRecentSave )
+            if ( _config.BackupMostRecentSave )
             {
                 return mostRecentSaves.First( );
             }
