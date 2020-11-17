@@ -16,11 +16,13 @@ namespace MinecraftSaver
         private const string AppDataEnvironmentVariable = "AppData";
         private const int SelectMostRecentCount = 5;
 
-        private bool _backupMostRecentSave;
+        private readonly bool _backupMostRecentSave;
+        private readonly bool _allowOverwrite;
 
-        internal Saver( bool backupMostRecentSave )
+        internal Saver( bool backupMostRecentSave, bool allowOverwrite )
         {
             _backupMostRecentSave = backupMostRecentSave;
+            _allowOverwrite = allowOverwrite;
         }
 
         internal void CreateBackup( )
@@ -34,6 +36,12 @@ namespace MinecraftSaver
 
             if ( File.Exists( backupFullFileName ) )
             {
+                if ( _allowOverwrite )
+                {
+                    OverwriteSave( saveToBackup, backupFullFileName );
+                    return;
+                }
+
                 FileInfo previousBackup = new FileInfo( backupFullFileName );
                 Console.WriteLine(
                     $"A backup was already created today at {previousBackup.LastWriteTimeUtc.ToLocalTime( ).ToLongTimeString( )}, do you want to overwrite this previous backup? (y)es/(n)o" );
@@ -42,8 +50,7 @@ namespace MinecraftSaver
                 if ( string.Equals( overwriteInput, "y", StringComparison.OrdinalIgnoreCase ) ||
                      string.Equals( overwriteInput, "yes", StringComparison.OrdinalIgnoreCase ) )
                 {
-                    File.Delete( backupFullFileName );
-                    CompressSave( saveToBackup, backupFullFileName );
+                    OverwriteSave( saveToBackup, backupFullFileName );
                 }
             }
             else
@@ -128,6 +135,12 @@ namespace MinecraftSaver
             Console.WriteLine( "Creating backup..." );
             ZipFile.CreateFromDirectory( saveToBackup.FullName, backupFileName );
             Console.WriteLine( $"Created backup '{backupFileName}'" );
+        }
+
+        private void OverwriteSave( DirectoryInfo saveToBackup, string backupFullFileName )
+        {
+            File.Delete( backupFullFileName );
+            CompressSave( saveToBackup, backupFullFileName );
         }
 
         private void WritePrompt( )
