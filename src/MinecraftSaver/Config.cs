@@ -11,5 +11,10 @@
             "Specifies whether an existing backup can be overwritten without further user consent",
             "f" )]
         internal bool AllowOverwrite { get; private set; }
+
+        [CommandLineSwitch( "help",
+            "Displays this help menu",
+            "h" )]
+        internal bool HelpSwitchReceived { get; private set; }
     }
 }

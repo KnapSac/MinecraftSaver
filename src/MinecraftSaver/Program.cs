@@ -11,6 +11,11 @@ namespace MinecraftSaver
         private static void Main( string[] args )
         {
             Parser parser = new Parser( args );
+            if ( parser.TryDisplayHelpMenu( ) )
+            {
+                return;
+            }
+
             Saver saver = new Saver( parser.CreateConfig( ) );
 
             try
