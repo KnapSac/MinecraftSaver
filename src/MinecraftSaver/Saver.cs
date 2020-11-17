@@ -16,6 +16,13 @@ namespace MinecraftSaver
         private const string AppDataEnvironmentVariable = "AppData";
         private const int SelectMostRecentCount = 5;
 
+        private bool _backupMostRecentSave;
+
+        internal Saver( bool backupMostRecentSave )
+        {
+            _backupMostRecentSave = backupMostRecentSave;
+        }
+
         internal void CreateBackup( )
         {
             DirectoryInfo oneDriveBackupDirectory = GetOneDriveBackupDirectory( );
@@ -80,9 +87,15 @@ namespace MinecraftSaver
         private DirectoryInfo SelectSaveToBackup( )
         {
             IDictionary<int, DirectoryInfo> indexedSaves = new Dictionary<int, DirectoryInfo>( );
+            IEnumerable<DirectoryInfo> mostRecentSaves = GetMostRecentSaves( );
+            if ( _backupMostRecentSave )
+            {
+                return mostRecentSaves.First( );
+            }
+
             int index = 0;
             int maxSaveNameLength = 0;
-            foreach ( DirectoryInfo save in GetMostRecentSaves( ) )
+            foreach ( DirectoryInfo save in mostRecentSaves )
             {
                 indexedSaves.Add( ++index, save );
                 maxSaveNameLength = Math.Max( maxSaveNameLength, save.Name.Length );

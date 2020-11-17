@@ -8,9 +8,16 @@ namespace MinecraftSaver
 {
     internal class Program
     {
-        private static void Main( )
+        private static void Main( string[] args )
         {
-            Saver saver = new Saver( );
+            bool backupMostRecentSave = false;
+            if ( 1 <= args.Length )
+            {
+                backupMostRecentSave = string.Equals( args[0], "--most-recent",
+                    StringComparison.OrdinalIgnoreCase );
+            }
+
+            Saver saver = new Saver( backupMostRecentSave );
             try
             {
                 saver.CreateBackup( );
