@@ -109,7 +109,7 @@ namespace MinecraftSaver
             foreach ( KeyValuePair<int, DirectoryInfo> pair in indexedSaves )
             {
                 Console.WriteLine(
-                    $"{pair.Key}. '{pair.Value.Name}'{new string( ' ', maxSaveNameLength - pair.Value.Name.Length )} {pair.Value.LastWriteTimeUtc}" );
+                    $"{pair.Key}. '{pair.Value.Name}'{' '.Repeat( maxSaveNameLength - pair.Value.Name.Length )} {pair.Value.LastWriteTimeUtc}" );
             }
 
             WritePrompt( );

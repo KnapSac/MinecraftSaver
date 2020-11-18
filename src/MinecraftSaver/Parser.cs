@@ -109,7 +109,7 @@ namespace MinecraftSaver
                 GetSwitchProperties( ) )
             {
                 Console.WriteLine(
-                    $"--{commandLineSwitch.Name}{new string( ' ', maxNameLength - commandLineSwitch.Name.Length )} (-{commandLineSwitch.ShortName})    {commandLineSwitch.Description}" );
+                    $"--{commandLineSwitch.Name}{' '.Repeat( maxNameLength - commandLineSwitch.Name.Length )} (-{commandLineSwitch.ShortName})    {commandLineSwitch.Description}" );
             }
         }
 
