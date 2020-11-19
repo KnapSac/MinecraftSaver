@@ -10,6 +10,12 @@ namespace MinecraftSaver
     {
         private static void Main( string[] args )
         {
+            CommandLineUtils.Parser p = new CommandLineUtils.Parser( );
+            p.Parse( );
+
+            Console.ReadKey( );
+            return;
+
             Parser parser = new Parser( args );
             if ( parser.TryDisplayHelpMenu( ) )
             {
