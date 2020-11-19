@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using CommandLineUtils.Attributes;
+using CommandLineUtils.Collections;
 
 #endregion
 
@@ -58,8 +59,8 @@ namespace CommandLineUtils.Parsing
 
         private IDictionary<string, PropertyInfo> InitializeMap( Assembly assembly )
         {
-            IDictionary<string, PropertyInfo> commandToPropertyInfoMap =
-                new Dictionary<string, PropertyInfo>( );
+            Map<string, PropertyInfo> commandToPropertyInfoMap =
+                new Map<string, PropertyInfo>( );
 
             foreach ( TypeInfo typeInfo in
                 GetClassesWithAttribute<CommandLineInterface>( assembly ) )
@@ -70,13 +71,35 @@ namespace CommandLineUtils.Parsing
                     CommandLineSwitch commandLineSwitch =
                         propertyInfo.GetCustomAttribute<CommandLineSwitch>( );
 
-                    commandToPropertyInfoMap.Add( commandLineSwitch.Name.ToLower( ), propertyInfo );
-                    commandToPropertyInfoMap.Add( commandLineSwitch.ShortName.ToLower( ),
-                        propertyInfo );
+                    string loweredSwitchName = commandLineSwitch.Name.ToLower( );
+                    AddCommandToMap( loweredSwitchName, propertyInfo, typeInfo,
+                        "Duplicate commands, defined at '{0}' and '{1}'",
+                        ref commandToPropertyInfoMap );
+
+                    string loweredShortSwitchName = commandLineSwitch.ShortName.ToLower( );
+                    AddCommandToMap( loweredShortSwitchName, propertyInfo, typeInfo,
+                        "Duplicate aliases, defined at '{0}' and '{1}'",
+                        ref commandToPropertyInfoMap );
                 }
             }
 
             return commandToPropertyInfoMap;
+        }
+
+        private void AddCommandToMap( string command, PropertyInfo propertyInfo, TypeInfo typeInfo,
+                                      string errorMessage, ref Map<string, PropertyInfo> map )
+        {
+            if ( !map.Add( command,
+                propertyInfo ) )
+            {
+                if ( map.TryGetValue( command,
+                    out PropertyInfo otherPropertyInfo ) )
+                {
+                    TypeInfo otherTypeInfo = otherPropertyInfo.DeclaringType.GetTypeInfo( );
+                    throw new ArgumentException( string.Format( errorMessage, typeInfo.FullName,
+                        otherTypeInfo.FullName ) );
+                }
+            }
         }
 
         private IEnumerable<TypeInfo> GetClassesWithAttribute<T>( Assembly assembly )

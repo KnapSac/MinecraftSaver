@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Attributes\CommandLineInterface.cs" />
     <Compile Include="Attributes\CommandLineSwitch.cs" />
+    <Compile Include="Collections\Map.cs" />
     <Compile Include="Parsing\Parser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
