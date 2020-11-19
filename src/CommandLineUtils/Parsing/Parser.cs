@@ -8,7 +8,7 @@ using CommandLineUtils.Attributes;
 
 #endregion
 
-namespace CommandLineUtils
+namespace CommandLineUtils.Parsing
 {
     public class Parser
     {
