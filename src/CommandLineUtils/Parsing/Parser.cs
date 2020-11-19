@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -17,44 +18,81 @@ namespace CommandLineUtils.Parsing
 
         private readonly IDictionary<string, PropertyInfo> _commandToPropertyInfoMap;
         private readonly string[] _args;
+        private readonly IList<string> _errorMessages;
 
         [MethodImpl( MethodImplOptions.NoInlining )]
         public Parser( string[] args )
         {
             _args = args;
             _commandToPropertyInfoMap = InitializeMap( Assembly.GetCallingAssembly( ) );
+            _errorMessages = new List<string>( );
         }
 
-        public T Parse<T>( ) where T : new( )
+        public bool Parse<T>( ref T instance )
         {
-            T instance = new T( );
+            bool success = true;
 
-            foreach ( string arg in _args )
+            IEnumerator enumerator = _args.GetEnumerator( );
+            while ( enumerator.MoveNext( ) )
             {
-                if ( SwitchIdentifier == arg[0] )
+                if ( !(enumerator.Current is string arg) )
+                {
+                    continue;
+                }
+
+                if ( IsCommand( arg ) )
                 {
                     string command = CleanCommand( arg );
                     if ( _commandToPropertyInfoMap.TryGetValue( command,
                         out PropertyInfo propertyInfo ) )
                     {
-                        //TODO Is there a more elegant way of doing this?
+                        //KNOWN If a boolean switch is passed, we consider it a flag so we can directly set the value to 'true'
                         if ( typeof(bool) == propertyInfo.PropertyType )
                         {
                             propertyInfo.SetValue( instance, true );
                         }
+
+                        //ASSUME Argument to switch with parameter is passed directly after the switch
+                        if ( typeof(string) == propertyInfo.PropertyType )
+                        {
+                            if ( enumerator.MoveNext( ) )
+                            {
+                                if ( null != enumerator.Current )
+                                {
+                                    if ( enumerator.Current is string value && !IsCommand( value ) )
+                                    {
+                                        propertyInfo.SetValue( instance, value );
+                                        continue;
+                                    }
+                                }
+                            }
+
+                            success = false;
+                            _errorMessages.Add( $"Missing argument for command '{command}'" );
+                        }
                     }
                     else
                     {
-                        Console.WriteLine( $"Ignoring unrecognized switch '{arg}'" );
+                        success = false;
+                        _errorMessages.Add( $"Ignoring unrecognized switch '{arg}'" );
                     }
                 }
                 else
                 {
-                    Console.WriteLine( $"Ignoring invalid argument '{arg}'" );
+                    success = false;
+                    _errorMessages.Add( $"Ignoring invalid argument '{arg}'" );
                 }
             }
 
-            return instance;
+            return success;
+        }
+
+        public void FlushErrorMessages( )
+        {
+            foreach ( string errorMessage in _errorMessages )
+            {
+                Console.WriteLine( errorMessage );
+            }
         }
 
         private IDictionary<string, PropertyInfo> InitializeMap( Assembly assembly )
@@ -124,6 +162,11 @@ namespace CommandLineUtils.Parsing
                     yield return propertyInfo;
                 }
             }
+        }
+
+        private bool IsCommand( string command )
+        {
+            return SwitchIdentifier == command[0];
         }
 
         private string CleanCommand( string command )

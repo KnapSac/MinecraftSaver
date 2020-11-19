@@ -12,8 +12,14 @@ namespace MinecraftSaver
         private static void Main( string[] args )
         {
             Parser parser = new Parser( args );
+            Config config = new Config( );
 
-            Config config = parser.Parse<Config>( );
+            if ( !parser.Parse( ref config ) )
+            {
+                parser.FlushErrorMessages( );
+                return;
+            }
+
             Saver saver = new Saver( config );
 
             try
