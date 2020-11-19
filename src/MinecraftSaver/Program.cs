@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using CommandLineUtils.Parsing;
 
 #endregion
 
@@ -10,19 +11,10 @@ namespace MinecraftSaver
     {
         private static void Main( string[] args )
         {
-            CommandLineUtils.Parsing.Parser p = new CommandLineUtils.Parsing.Parser( );
-            p.Parse( );
-
-            Console.ReadKey( );
-            return;
-
             Parser parser = new Parser( args );
-            if ( parser.TryDisplayHelpMenu( ) )
-            {
-                return;
-            }
 
-            Saver saver = new Saver( parser.CreateConfig( ) );
+            Config config = parser.Parse<Config>( );
+            Saver saver = new Saver( config );
 
             try
             {
